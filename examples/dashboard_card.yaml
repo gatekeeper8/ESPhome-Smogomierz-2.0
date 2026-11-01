@@ -1,0 +1,37 @@
+# Example Home Assistant dashboard card (Edit dashboard -> Add card -> Manual).
+# Entity IDs assume the device name "smogomierz" from smogomierz.yaml.
+type: vertical-stack
+cards:
+  - type: gauge
+    name: PM2.5
+    entity: sensor.smogomierz_pm2_5
+    min: 0
+    max: 110
+    needle: true
+    # Polish air-quality index bands for PM2.5 (µg/m³)
+    segments:
+      - from: 0
+        color: "#2e7d32"
+      - from: 13
+        color: "#9ccc65"
+      - from: 35
+        color: "#fbc02d"
+      - from: 55
+        color: "#f57c00"
+      - from: 75
+        color: "#d32f2f"
+      - from: 110
+        color: "#6a1b9a"
+  - type: entities
+    entities:
+      - entity: sensor.smogomierz_pm10
+      - entity: sensor.smogomierz_pm1_0
+      - entity: sensor.smogomierz_temperature
+      - entity: sensor.smogomierz_humidity
+      - entity: sensor.smogomierz_pressure_sea_level
+      - entity: binary_sensor.smogomierz_pm_readings_unreliable_humidity
+  - type: history-graph
+    hours_to_show: 48
+    entities:
+      - entity: sensor.smogomierz_pm2_5
+      - entity: sensor.smogomierz_pm10

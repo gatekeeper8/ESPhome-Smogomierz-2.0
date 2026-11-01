@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" font-family="Helvetica, Arial, sans-serif" font-size="14">
+  <title>ESPHome Smogomierz wiring: NodeMCU, PMS7003, SHT45, BME280, BH1750</title>
+  <rect width="1000" height="620" fill="#ffffff"/>
+  <text x="500" y="36" text-anchor="middle" font-size="22" font-weight="bold" fill="#1d2433">ESPHome Smogomierz - wiring</text>
+  <text x="500" y="60" text-anchor="middle" fill="#5b6475">same as the original Smogomierz: no soldering changes needed</text>
+  <rect x="340" y="130" width="300" height="270" rx="12" fill="#1f4e79"/>
+  <rect x="450" y="114" width="80" height="22" rx="4" fill="#9aa5b1"/><text x="490" y="130" text-anchor="middle" font-size="11" fill="#1d2433">USB 5 V</text>
+  <text x="490" y="170" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff">NodeMCU</text>
+  <text x="490" y="190" text-anchor="middle" font-size="12" fill="#cfe3f5">v2 / v3 · ESP8266</text>
+  <circle cx="350" cy="230" r="6" fill="#d62828" stroke="#fff"/><text x="362" y="235" font-size="13" fill="#fff">VIN (5 V)</text>
+  <circle cx="350" cy="270" r="6" fill="#333333" stroke="#fff"/><text x="362" y="275" font-size="13" fill="#fff">G</text>
+  <circle cx="350" cy="310" r="6" fill="#2a9d8f" stroke="#fff"/><text x="362" y="315" font-size="13" fill="#fff">D1 · GPIO5 (RX)</text>
+  <circle cx="350" cy="350" r="6" fill="#8e44ad" stroke="#fff"/><text x="362" y="355" font-size="13" fill="#fff">D2 · GPIO4 (TX)</text>
+  <circle cx="630" cy="230" r="6" fill="#f77f00" stroke="#fff"/><text x="618" y="235" text-anchor="end" font-size="13" fill="#fff">3V</text>
+  <circle cx="630" cy="270" r="6" fill="#333333" stroke="#fff"/><text x="618" y="275" text-anchor="end" font-size="13" fill="#fff">G</text>
+  <circle cx="630" cy="310" r="6" fill="#e9b949" stroke="#fff"/><text x="618" y="315" text-anchor="end" font-size="13" fill="#fff">D3 · GPIO0 (SDA)</text>
+  <circle cx="630" cy="350" r="6" fill="#277da1" stroke="#fff"/><text x="618" y="355" text-anchor="end" font-size="13" fill="#fff">D4 · GPIO2 (SCL)</text>
+  <rect x="40" y="190" width="170" height="200" rx="10" fill="#e8eef5" stroke="#1d2433"/>
+  <text x="125" y="222" text-anchor="middle" font-size="17" font-weight="bold" fill="#1d2433">PMS7003</text>
+  <text x="125" y="240" text-anchor="middle" font-size="11" fill="#5b6475">via adapter board</text>
+  <text x="192" y="274" text-anchor="end" font-size="12" fill="#1d2433">pin 1/2 VCC</text><circle cx="202" cy="270" r="5" fill="#d62828"/>
+  <path d="M207 270 H260 V230 H344" fill="none" stroke="#d62828" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="192" y="304" text-anchor="end" font-size="12" fill="#1d2433">pin 3/4 GND</text><circle cx="202" cy="300" r="5" fill="#333333"/>
+  <path d="M207 300 H280 V270 H344" fill="none" stroke="#333333" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="192" y="334" text-anchor="end" font-size="12" fill="#1d2433">pin 9 TX</text><circle cx="202" cy="330" r="5" fill="#2a9d8f"/>
+  <path d="M207 330 H300 V310 H344" fill="none" stroke="#2a9d8f" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="192" y="364" text-anchor="end" font-size="12" fill="#1d2433">pin 7 RX</text><circle cx="202" cy="360" r="5" fill="#8e44ad"/>
+  <path d="M207 360 H320 V350 H344" fill="none" stroke="#8e44ad" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="125" y="418" text-anchor="middle" font-size="12" fill="#5b6475">SET and RESET stay unconnected.</text>
+  <text x="125" y="436" text-anchor="middle" font-size="12" fill="#5b6475">5 V supply, 3.3 V data lines:</text>
+  <text x="125" y="454" text-anchor="middle" font-size="12" fill="#5b6475">no level shifter needed.</text>
+  <path d="M636 230 H700" fill="none" stroke="#f77f00" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M700 150 V430" fill="none" stroke="#f77f00" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="700" cy="230" r="4" fill="#1d2433"/>
+  <path d="M636 270 H720" fill="none" stroke="#333333" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M720 150 V430" fill="none" stroke="#333333" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="720" cy="270" r="4" fill="#1d2433"/>
+  <path d="M636 310 H740" fill="none" stroke="#e9b949" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M740 150 V430" fill="none" stroke="#e9b949" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="740" cy="310" r="4" fill="#1d2433"/>
+  <path d="M636 350 H760" fill="none" stroke="#277da1" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M760 150 V430" fill="none" stroke="#277da1" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="760" cy="350" r="4" fill="#1d2433"/>
+  <text x="730" y="458" text-anchor="middle" font-size="12" fill="#5b6475">I²C bus: all sensors in parallel</text>
+  <rect x="830" y="110" width="150" height="92" rx="8" fill="#e8f5ee" stroke="#1d2433"/>
+  <text x="905" y="136" text-anchor="middle" font-size="16" font-weight="bold" fill="#1d2433">SHT45</text>
+  <text x="905" y="156" text-anchor="middle" font-size="12" fill="#1d2433">0x44</text>
+  <text x="905" y="176" text-anchor="middle" font-size="12" fill="#5b6475">temperature, humidity</text>
+  <path d="M700 132 H830" fill="none" stroke="#f77f00" stroke-width="2.5"/><circle cx="700" cy="132" r="3.5" fill="#1d2433"/>
+  <path d="M720 148 H830" fill="none" stroke="#333333" stroke-width="2.5"/><circle cx="720" cy="148" r="3.5" fill="#1d2433"/>
+  <path d="M740 164 H830" fill="none" stroke="#e9b949" stroke-width="2.5"/><circle cx="740" cy="164" r="3.5" fill="#1d2433"/>
+  <path d="M760 180 H830" fill="none" stroke="#277da1" stroke-width="2.5"/><circle cx="760" cy="180" r="3.5" fill="#1d2433"/>
+  <rect x="830" y="230" width="150" height="92" rx="8" fill="#e8f5ee" stroke="#1d2433"/>
+  <text x="905" y="256" text-anchor="middle" font-size="16" font-weight="bold" fill="#1d2433">BME280</text>
+  <text x="905" y="276" text-anchor="middle" font-size="12" fill="#1d2433">0x76</text>
+  <text x="905" y="296" text-anchor="middle" font-size="12" fill="#5b6475">pressure</text>
+  <path d="M700 252 H830" fill="none" stroke="#f77f00" stroke-width="2.5"/><circle cx="700" cy="252" r="3.5" fill="#1d2433"/>
+  <path d="M720 268 H830" fill="none" stroke="#333333" stroke-width="2.5"/><circle cx="720" cy="268" r="3.5" fill="#1d2433"/>
+  <path d="M740 284 H830" fill="none" stroke="#e9b949" stroke-width="2.5"/><circle cx="740" cy="284" r="3.5" fill="#1d2433"/>
+  <path d="M760 300 H830" fill="none" stroke="#277da1" stroke-width="2.5"/><circle cx="760" cy="300" r="3.5" fill="#1d2433"/>
+  <rect x="830" y="350" width="150" height="92" rx="8" fill="#f6f6f6" stroke="#999" stroke-dasharray="6 4"/>
+  <text x="905" y="376" text-anchor="middle" font-size="16" font-weight="bold" fill="#1d2433">BH1750</text>
+  <text x="905" y="396" text-anchor="middle" font-size="12" fill="#1d2433">0x23</text>
+  <text x="905" y="416" text-anchor="middle" font-size="12" fill="#5b6475">light (optional)</text>
+  <path d="M700 372 H830" fill="none" stroke="#f77f00" stroke-width="2.5" stroke-dasharray="6 4"/><circle cx="700" cy="372" r="3.5" fill="#1d2433"/>
+  <path d="M720 388 H830" fill="none" stroke="#333333" stroke-width="2.5" stroke-dasharray="6 4"/><circle cx="720" cy="388" r="3.5" fill="#1d2433"/>
+  <path d="M740 404 H830" fill="none" stroke="#e9b949" stroke-width="2.5" stroke-dasharray="6 4"/><circle cx="740" cy="404" r="3.5" fill="#1d2433"/>
+  <path d="M760 420 H830" fill="none" stroke="#277da1" stroke-width="2.5" stroke-dasharray="6 4"/><circle cx="760" cy="420" r="3.5" fill="#1d2433"/>
+  <text x="40" y="500" font-size="12" fill="#5b6475">D3 / D4 are boot pins: the sensor boards' pull-up resistors keep them high at start-up, which the ESP8266 needs.</text>
+  <text x="40" y="518" font-size="12" fill="#5b6475">Keep I²C wires under ~1 m (or twist SDA with GND, SCL with 3V). Power from a proper 5 V / 1 A+ charger.</text>
+  <line x1="40" y1="580" x2="70" y2="580" stroke="#d62828" stroke-width="4"/><text x="76" y="584" font-size="12" fill="#1d2433">5 V</text>
+  <line x1="117" y1="580" x2="147" y2="580" stroke="#f77f00" stroke-width="4"/><text x="153" y="584" font-size="12" fill="#1d2433">3.3 V</text>
+  <line x1="208" y1="580" x2="238" y2="580" stroke="#333333" stroke-width="4"/><text x="244" y="584" font-size="12" fill="#1d2433">GND</text>
+  <line x1="285" y1="580" x2="315" y2="580" stroke="#2a9d8f" stroke-width="4"/><text x="321" y="584" font-size="12" fill="#1d2433">PMS TX → ESP RX</text>
+  <line x1="446" y1="580" x2="476" y2="580" stroke="#8e44ad" stroke-width="4"/><text x="482" y="584" font-size="12" fill="#1d2433">ESP TX → PMS RX</text>
+  <line x1="607" y1="580" x2="637" y2="580" stroke="#e9b949" stroke-width="4"/><text x="643" y="584" font-size="12" fill="#1d2433">SDA</text>
+  <line x1="684" y1="580" x2="714" y2="580" stroke="#277da1" stroke-width="4"/><text x="720" y="584" font-size="12" fill="#1d2433">SCL</text>
+  <line x1="761" y1="580" x2="791" y2="580" stroke="#999" stroke-width="3" stroke-dasharray="6 4"/><text x="797" y="584" font-size="12" fill="#1d2433">optional</text>
+</svg>

@@ -1,0 +1,280 @@
+# =====================================================================
+#  ESPHome Smogomierz - outdoor air quality for Home Assistant
+#  https://github.com/gatekeeper8/ESPhome-Smogomierz-2.0  (MIT License)
+#  NodeMCU v2/v3 (ESP8266) + PMS7003 + SHT45 + BME280 (+ optional BH1750)
+#  Inspired by Smogomierz / Smogly by Hackerspace Silesia
+#  (https://github.com/hackerspace-silesia/Smogomierz) - same hardware
+#  and wiring, new ESPHome firmware.
+# ---------------------------------------------------------------------
+#  WIRING - same as the original Smogomierz (see docs/wiring.svg)
+#    PMS7003 (10-pin 1.27 mm connector, use the adapter board)
+#      pin 1/2  VCC (5 V)  -> NodeMCU VIN (5 V from USB)
+#      pin 3/4  GND        -> NodeMCU G (GND)
+#      pin 9    TX         -> NodeMCU D1 (GPIO5)  = ESP RX
+#      pin 7    RX         -> NodeMCU D2 (GPIO4)  = ESP TX
+#    POWER: use a proper 5 V charger (1 A+) on the enclosure socket.
+#    Weak USB power (e.g. a PC port via an extension cable) makes the
+#    PMS7003 send garbage: "Start character 1 mismatch" in the log.
+#      (SET and RESET can stay unconnected)
+#    PMS7003 needs 5 V power, but its data lines are 3.3 V, so it
+#    connects to the ESP8266 directly, no level shifter needed.
+#
+#    I2C BUS - all three sensors in parallel on the same 4 wires:
+#      VCC -> 3V,  GND -> G,  SDA -> D3 (GPIO0),  SCL -> D4 (GPIO2)
+#      SHT45   address 0x44  temperature + humidity (more stable outdoors
+#                            than the BME280's humidity, which drifts)
+#      BME280  address 0x76  pressure
+#      BH1750  address 0x23  light - optional, block below is commented out
+#      (Adafruit blue BME280 board: SDI -> D3, SCK -> D4, SDO -> GND)
+#    Keep I2C wires short (under ~1 m). For longer runs use twisted
+#    pairs: SDA twisted with GND, SCL twisted with 3V.
+#
+#  D3 and D4 are boot pins: they must be HIGH when the board starts.
+#  The BME280 board's I2C pull-up resistors keep them high, which is
+#  why this wiring has always worked. Side effect: the small blue LED
+#  on the ESP module (on D4) may flicker - that is normal.
+#
+#  SENSOR LIFE: the PMS7003 laser and fan last roughly 8,000 h when
+#  running non-stop. With update_interval above 30 s ESPHome sleeps
+#  the sensor between readings (fan off) and wakes it 30 s before
+#  each one, which multiplies its life and cuts power use.
+# =====================================================================
+
+substitutions:
+  name: smogomierz
+  friendly_name: Smogomierz
+  # how often PM is measured (sensor sleeps in between)
+  pm_interval: 120s
+  # above this outdoor humidity, optical PM readings run too high
+  fog_humidity: "85"
+  # your altitude above sea level in metres (for sea-level pressure)
+  altitude: "100"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp8266:
+  # 'nodemcuv2' is the right choice for NodeMCU v3 too (same ESP-12E module)
+  board: nodemcuv2
+
+logger:
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  # updates are authenticated and encrypted with the same key as the API
+  - platform: esphome
+    encryption:
+      key: !secret api_encryption_key
+
+wifi:
+  # put the reserved IP here, so the dashboard reaches it without mDNS
+  # use_address: 192.168.x.y
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # outdoors the signal is often weak: stay connected, no power saving
+  power_save_mode: none
+  ap:
+    ssid: "Smogomierz Fallback"
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+# ---------------------------------------------------------------- sharing
+# Sensor.Community upload (public air quality map). Off until you switch
+# "Sensor.Community upload" on in Home Assistant - register first at
+# devices.sensor.community using the "Sensor.Community ID" shown in HA.
+#   Sensor types to register: PMS7003 (pin 1) and BME280 (pin 11).
+#   (temperature + humidity come from the SHT45, pressure from the BME280)
+http_request:
+  timeout: 10s
+  # ESP8266 cannot verify certificates; uploads use plain HTTP anyway
+  verify_ssl: false
+
+switch:
+  - platform: template
+    name: "Sensor.Community upload"
+    id: sc_upload
+    icon: mdi:earth
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+
+text_sensor:
+  - platform: template
+    name: "Sensor.Community ID"
+    id: sc_id
+    icon: mdi:identifier
+    entity_category: diagnostic
+    update_interval: 3600s
+    lambda: |-
+      return str_sprintf("esp8266-%u", ESP.getChipId());
+
+interval:
+  # Sensor.Community expects a reading about every 145 s
+  - interval: 145s
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: sc_upload
+              - lambda: 'return !isnan(id(pm25).state) && !isnan(id(pm10).state);'
+          then:
+            - http_request.post:
+                url: http://api.sensor.community/v1/push-sensor-data/
+                request_headers:
+                  Content-Type: application/json
+                  X-Pin: "1"
+                  X-Sensor: !lambda 'return str_sprintf("esp8266-%u", ESP.getChipId());'
+                body: !lambda |-
+                  return str_sprintf(
+                    "{\"software_version\":\"esphome-smogomierz\",\"sensordatavalues\":["
+                    "{\"value_type\":\"P0\",\"value\":\"%.0f\"},"
+                    "{\"value_type\":\"P1\",\"value\":\"%.0f\"},"
+                    "{\"value_type\":\"P2\",\"value\":\"%.0f\"}]}",
+                    id(pm1).state, id(pm10).state, id(pm25).state);
+      - if:
+          condition:
+            and:
+              - switch.is_on: sc_upload
+              - lambda: 'return !isnan(id(temp).state) && !isnan(id(hum).state) && !isnan(id(press).state);'
+          then:
+            - http_request.post:
+                url: http://api.sensor.community/v1/push-sensor-data/
+                request_headers:
+                  Content-Type: application/json
+                  X-Pin: "11"
+                  X-Sensor: !lambda 'return str_sprintf("esp8266-%u", ESP.getChipId());'
+                body: !lambda |-
+                  return str_sprintf(
+                    "{\"software_version\":\"esphome-smogomierz\",\"sensordatavalues\":["
+                    "{\"value_type\":\"temperature\",\"value\":\"%.1f\"},"
+                    "{\"value_type\":\"humidity\",\"value\":\"%.1f\"},"
+                    "{\"value_type\":\"pressure\",\"value\":\"%.0f\"}]}",
+                    id(temp).state, id(hum).state, id(press).state * 100.0f);
+
+uart:
+  id: pms_uart
+  rx_pin: GPIO5   # D1 <- PMS7003 TX
+  tx_pin: GPIO4   # D2 -> PMS7003 RX
+  baud_rate: 9600
+
+i2c:
+  sda: GPIO0      # D3
+  scl: GPIO2      # D4
+  scan: true
+
+sensor:
+  # --------------------------------------------------------- particulates
+  - platform: pmsx003
+    type: PMSX003
+    uart_id: pms_uart
+    update_interval: ${pm_interval}
+    pm_1_0:
+      name: "PM1.0"
+      id: pm1
+    pm_2_5:
+      name: "PM2.5"
+      id: pm25
+    pm_10_0:
+      name: "PM10"
+      id: pm10
+    pm_0_3um:
+      name: "Particles >0.3um"
+      disabled_by_default: true
+    pm_2_5um:
+      name: "Particles >2.5um"
+      disabled_by_default: true
+
+  # --------------------------------------------------------- climate
+  # SHT45: outdoor temperature + humidity
+  - platform: sht4x
+    address: 0x44
+    update_interval: 60s
+    precision: High
+    temperature:
+      name: "Temperature"
+      id: temp
+      accuracy_decimals: 1
+    humidity:
+      name: "Humidity"
+      id: hum
+      accuracy_decimals: 1
+
+  # BME280: pressure only. Its own temperature is still needed by the
+  # chip internally, so it is kept but hidden from Home Assistant.
+  - platform: bme280_i2c
+    # 0x76 on most boards; if the log shows "not found", try 0x77
+    address: 0x76
+    update_interval: 60s
+    temperature:
+      id: bme_temp
+      internal: true
+    pressure:
+      name: "Pressure"
+      id: press
+      oversampling: 2x
+
+  # sea-level pressure, the value weather forecasts use
+  # (set your altitude in the substitutions at the top)
+  - platform: template
+    name: "Pressure (sea level)"
+    unit_of_measurement: "hPa"
+    device_class: pressure
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 60s
+    lambda: |-
+      const float altitude = ${altitude};
+      if (isnan(id(press).state) || isnan(id(temp).state)) return NAN;
+      return id(press).state / powf(1.0f - (0.0065f * altitude) /
+             (id(temp).state + 0.0065f * altitude + 273.15f), 5.257f);
+
+  # dew point (Magnus formula): when the temperature gets close to it,
+  # fog / condensation is likely and optical PM readings run high
+  - platform: template
+    name: "Dew point"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 60s
+    lambda: |-
+      const float t = id(temp).state, rh = id(hum).state;
+      if (isnan(t) || isnan(rh) || rh <= 0) return NAN;
+      const float a = 17.62f, b = 243.12f;
+      const float g = logf(rh / 100.0f) + a * t / (b + t);
+      return b * g / (a - g);
+
+  # BH1750 outdoor light (optional) - uncomment if you fitted one, behind
+  # a window in the enclosure, out of direct rain
+  # - platform: bh1750
+  #   name: "Illuminance"
+  #   id: lux
+  #   address: 0x23
+  #   update_interval: 60s
+
+  # --------------------------------------------------------- diagnostics
+  - platform: wifi_signal
+    name: "WiFi signal"
+    update_interval: 120s
+    entity_category: diagnostic
+
+  - platform: uptime
+    name: "Uptime"
+    entity_category: diagnostic
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+
+  # PM readings are unreliable in fog / very humid air
+  - platform: template
+    name: "PM readings unreliable (humidity)"
+    device_class: problem
+    lambda: |-
+      if (isnan(id(hum).state)) return {};
+      return id(hum).state > ${fog_humidity};
