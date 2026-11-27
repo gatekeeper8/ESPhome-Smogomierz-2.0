@@ -43,8 +43,10 @@
 substitutions:
   name: smogomierz
   friendly_name: Smogomierz
-  # how often PM is measured (sensor sleeps in between)
-  pm_interval: 120s
+  # how often PM is measured (sensor sleeps in between). 5 min keeps the
+  # fan and laser off most of the time: longer sensor life, and less heat
+  # in the box (a sensor running every 2 min warmed the SHT45 noticeably)
+  pm_interval: 300s
   # above this outdoor humidity, optical PM readings run too high
   fog_humidity: "85"
   # your altitude above sea level in metres (for sea-level pressure)
@@ -198,11 +200,16 @@ sensor:
     temperature:
       name: "Temperature"
       id: temp
-      accuracy_decimals: 1
+      accuracy_decimals: 2
+      # send the rounded value, not the raw float (e.g. 2.25, not 2.2517...)
+      filters:
+        - round: 2
     humidity:
       name: "Humidity"
       id: hum
       accuracy_decimals: 1
+      filters:
+        - round: 1
 
   # BME280: pressure only. Its own temperature is still needed by the
   # chip internally, so it is kept but hidden from Home Assistant.
@@ -217,6 +224,9 @@ sensor:
       name: "Pressure"
       id: press
       oversampling: 2x
+      accuracy_decimals: 1
+      filters:
+        - round: 1
 
   # sea-level pressure, the value weather forecasts use
   # (set your altitude in the substitutions at the top)
@@ -227,6 +237,8 @@ sensor:
     state_class: measurement
     accuracy_decimals: 1
     update_interval: 60s
+    filters:
+      - round: 1
     lambda: |-
       const float altitude = ${altitude};
       if (isnan(id(press).state) || isnan(id(temp).state)) return NAN;
@@ -242,6 +254,8 @@ sensor:
     state_class: measurement
     accuracy_decimals: 1
     update_interval: 60s
+    filters:
+      - round: 1
     lambda: |-
       const float t = id(temp).state, rh = id(hum).state;
       if (isnan(t) || isnan(rh) || rh <= 0) return NAN;
