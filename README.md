@@ -73,10 +73,14 @@ blue LED on D4 may flicker; that is normal.
 ## Tips
 
 - **Placement:** ~1.5–3 m above ground, out of direct sun, rain and exhaust, with free
-  air flow to the PMS7003 inlet. A radiation shield for the SHT45 improves temperature
-  readings.
+  air flow to the PMS7003 inlet.
+- **Temperature:** keep the SHT45 *outside* the box, on a 10–20 cm cable below it (warm
+  air rises), ideally in a small radiation shield. Inside the box the ESP and the PMS7003
+  warm it: in one installation it read about 1 °C high at night and up to 3 °C around
+  midday, compared with a reference station a few centimetres away.
 - **Sensor life:** the PMS7003 fan and laser last about 8,000 hours non-stop. With the
-  default 120 s interval the sensor sleeps between readings, which multiplies its life.
+  default 300 s interval the sensor sleeps between readings, which multiplies its life
+  and keeps the box cooler. Set `pm_interval` in the substitutions to change it.
 - **Fog:** optical PM sensors over-read in very humid air. Use the "PM readings
   unreliable" sensor to hide or flag values.
 - **mDNS problems** (Docker setups): add `use_address: <reserved IP>` under `wifi:`.
